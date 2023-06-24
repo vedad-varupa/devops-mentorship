@@ -1,0 +1,104 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Created two EC2 Instances and Security Groups
+
+Parameters:
+  InstanceName:
+    Description: Please enter Instance Name
+    Type: String
+    Default: webserver
+  InstanceType:
+    Description: Please choose a supported instance type
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - t2.medium
+      - t2.large
+  StageName:
+    Type: String
+    Description: Please choose a supported stage
+    Default: dev
+    AllowedValues:
+      - dev
+      - prod
+
+
+Resources:
+  WebServerSecGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for SSH and HTTP access
+      VpcId: vpc-0ebfaf10c97954cfb 
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: '-1'
+          FromPort: 0
+          ToPort: 0
+          CidrIp: 0.0.0.0/0
+
+  DBServerSecGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for MySQL
+      VpcId: vpc-0ebfaf10c97954cfb 
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          FromPort: 22
+          IpProtocol: tcp
+          ToPort: 22
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: '-1'
+          FromPort: 0
+          ToPort: 0
+          CidrIp: 0.0.0.0/0
+
+
+  EC2Instance1:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-02bf24eb1dd9ca3dc
+      InstanceType: !Ref InstanceType
+      KeyName: vedad-varupa-web-server-key
+      SecurityGroupIds:
+        - !Ref WebServerSecGroup
+      SubnetId: subnet-0c0f46c3eca6b2961
+      Tags:
+        - Key: Name
+          Value: task-12-web-server-cf
+        - Key: Stage
+          Value: !Ref StageName
+
+  EC2Instance2:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-02bf24eb1dd9ca3dc
+      InstanceType: !Ref InstanceType
+      KeyName: vedad-varupa-web-server-key
+      SecurityGroupIds:
+        - !Ref DBServerSecGroup
+      SubnetId: subnet-036f6c5d45adb87f1
+      Tags:
+        - Key: Name
+          Value: task-12-db-server-cf
+        - Key: Stage
+          Value: !Ref StageName
+
+Outputs:
+  WebServerInstanceID:
+    Description: The Instance ID of the web server
+    Value: !Ref EC2Instance1
+  DBInstanceID:
+    Description: The Instance ID of the database server
+    Value: !Ref EC2Instance2

@@ -1,0 +1,10 @@
+---
+- name: Nginx content
+  hosts: webservertf
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Create index.html file for tf
+      copy:
+        content: "Hello from Nginx web server created using Terraform and Ansible."
+        dest: /usr/share/nginx/html/index.html

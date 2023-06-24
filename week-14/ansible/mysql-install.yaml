@@ -1,0 +1,21 @@
+- name: DB servers
+  hosts: dbservers
+  become: yes
+
+  tasks:
+    - name: Copy sh script
+      copy:
+        src: mysql-install.sh
+        dest:  ~/mysql-yum-repo.sh
+        owner: root
+        group: root
+        mode: 0777
+
+    - name: Run sh script
+      shell: ~/mysql-yum-repo.sh
+
+    - name: Install mysql
+      dnf:
+        name: mysql-community-server
+        state: latest
+                   
